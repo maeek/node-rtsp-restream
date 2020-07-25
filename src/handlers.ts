@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import CameraStream from './stream/Camera';
 
-const getNewStream = () => new CameraStream(process.env.ONVIF_URL, {
+export const getNewStream = () => new CameraStream(process.env.ONVIF_URL, {
     user: process.env.USER,
     pass: process.env.PASS
 });

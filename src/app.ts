@@ -10,14 +10,19 @@
 // });
 import 'dotenv';
 import express from 'express';
+import http from 'http';
 import { rootHandler } from './handlers';
+// import Socket from './Socket';
 
 const app = express();
 const port = process.env.PORT || '3000';
 
 app.get('/', rootHandler);
 
-app.listen(port, err => {
-    if (err) return console.error(err);
-    return console.log(`Server is listening on ${port}`);
+const server = http.createServer(app);
+
+// const io = new Socket(server);
+
+server.listen(port, () => {
+    console.log(`Server is listening on ${port}`);
 });
