@@ -1,23 +1,46 @@
-// import ffmpeg from 'ffmpeg';
-// const stream = new Stream({
-//     name: "name",
-//     streamUrl: url, // rtsp url
-//     wsPort: port,  // ws port
-//     ffmpegOptions: { // options ffmpeg flags
-//         '-stats': '', // an option with no neccessary value uses a blank string
-//         '-r': 30 // options with required values specify the value after the key
-//     }
-// });
 import 'dotenv';
 import express from 'express';
-import { rootHandler } from './handlers';
+import http from 'http';
+import path from 'path';
+import { Server } from 'socket.io';
+import StreamService from './StreamService';
 
 const app = express();
-const port = process.env.PORT || '3000';
+const transport = http.createServer(app);
+const io = new Server(transport);
 
-app.get('/', rootHandler);
+const stream = new StreamService(process.env.RTSP_URI);
 
-app.listen(port, err => {
-    if (err) return console.error(err);
-    return console.log(`Server is listening on ${port}`);
+io.on('connection', (socket) => {
+  console.log('Connected');
+
+  stream.watch((chunk: any, encoding: any) => {
+    socket.emit('vs', chunk);
+    console.log('streaming');
+  })
+
+  socket.on('start', () => {
+    stream.start();
+    console.log('stream started');
+  })
+
+  socket.on('stop', () => {
+    stream.stop();
+    console.log('stream stopped');
+  })
+
+  socket.on('disconnect', () => {
+    stream.stop();
+    console.log('stream stopped');
+  })
+
+  socket.emit('test');
+});
+
+app.get('/', (req, res) => {
+  res.sendFile(path.resolve(__dirname, './index.html'));
+});
+
+transport.listen(3000, () => {
+  console.log('listening on *:3000');
 });

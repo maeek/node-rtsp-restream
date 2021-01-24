@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    body, html { margin: 0; padding: 0; overflow: hidden; }
+  </style>
+  <script src="https://cdn.socket.io/socket.io-3.0.1.js"></script>
+</head>
+<body>
+  <video style="width: 100vw; height: 100vh;" autoplay controls></video>
+  <script>
+    const vid = document.querySelector('video');
+    const socket = io('ws://localhost:3000');
+    // const blobArray = [];
+
+    socket.on('connect', (socket) => {
+      console.log('Connected');
+    });
+
+    socket.on('test', () => {
+      console.log('Test successful');
+    });
+
+    const mediaSource = new MediaSource();
+    vid.src = window.URL.createObjectURL(mediaSource);
+
+    mediaSource.addEventListener('sourceopen', function() {
+      socket.on('vs', (chunk) => {
+        const sourceBuffer = mediaSource.addSourceBuffer('audio/mp4; codecs="mp4a.40.2"');
+        sourceBuffer.appendBuffer(new Uint8Array(chunk));
+        console.log(chunk);
+      });
+    });
+
+    // socket.on('vs', (chunk) => {
+    // blobArray.push(new Blob([new Uint8Array(chunk)],{'type':'video/mp4'}));
+    // const currentTime = vid.currentTime;
+    // const blob = new Blob(blobArray,{'type':'video/webm'});
+    // vid.src = window.URL.createObjectURL(blob);
+    // vid.currentTime = currentTime;
+    // vid.play();
+    // });
+  
+  </script>
+</body>
+</html>
